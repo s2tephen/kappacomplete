@@ -149,6 +149,7 @@ var matchEmotes = function(substr) {
 var bindEvents = function() {
   var chatbox = document.querySelector('.chat_text_input');
   var wrapper = document.querySelector('.chat-input');
+  var button = document.querySelector('.chat-buttons-container > .primary');
   var curStr = '';
   var emotes = [];
 
@@ -176,8 +177,14 @@ var bindEvents = function() {
     }
   };
 
+  // send message via button
+  var onButtonClick = function(e) {
+    updateEmoteCounts(chatbox.value);
+  }
+
   wrapper.addEventListener('keydown', interceptKeyDown, true);
   chatbox.addEventListener('input', onChatInput, false);
+  button.addEventListener('click', onButtonClick, false);
 };
 
 // update emote counts
