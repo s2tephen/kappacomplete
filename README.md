@@ -1,5 +1,7 @@
 # KappaComplete
 
+![KappaComplete](icon128.png)
+
 A lightweight autocomplete Chrome extension for Twitch emotes. [Get it here](https://chrome.google.com/webstore/detail/gldlaombdcbakndhnaahbhcaikdjkbek).
 
 On any Twitch channel page, hit the TAB key in chat to autocomplete any valid emote. This works for both global and subscriber emotes. Autocomplete will only fire on strings of two or more characters (any shorter and it's not actually saving you any keypresses). Keep hitting TAB to cycle through all matching emotes. You can still pull up usernames/suggestions with the @ key.
