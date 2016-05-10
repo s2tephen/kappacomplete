@@ -1,6 +1,13 @@
 'use strict';
 
+// emotes for autocomplete
 var allEmotes = [];
+
+// counts for each emote
+var emoteCounts = {};
+if (localStorage['kc-counts']) {
+  emoteCounts = JSON.parse(localStorage['kc-counts']);
+}
 
 // setup extension and call functions when ready
 var setupExtension = function(cleanRegexes, bindEvents) {
@@ -123,8 +130,18 @@ function escapeRegex(str) {
 // return emotes that match substring
 var matchEmotes = function(substr) {
   var regex = new RegExp('^' + escapeRegex(substr), 'i');
-  return allEmotes.filter(function(e) {
-    return regex.test(e);
+  return allEmotes.filter(function(v) {
+    return regex.test(v);
+  }).sort(function(a, b) { // sort by count
+    if (b in emoteCounts) {
+      if (a in emoteCounts) {
+        return emoteCounts[b] - emoteCounts[a]; 
+      } else {
+        return 1; // b first
+      }
+    } else {
+      return -1; // a first
+    }
   });
 };
 
@@ -144,6 +161,8 @@ var bindEvents = function() {
         chatbox.value = chatbox.value.replace(/(^| )\S+$/i, '$1' + emotes[0]);
         emotes.push(emotes.shift()); // cycle through all valid emotes
       }
+    } else if (e.target.className.indexOf('chat_text_input') > -1 && e.which === 13) {
+      updateEmoteCounts(chatbox.value);
     }
   };
 
@@ -159,6 +178,22 @@ var bindEvents = function() {
 
   wrapper.addEventListener('keydown', interceptKeyDown, true);
   chatbox.addEventListener('input', onChatInput, false);
+};
+
+// update emote counts
+// assuming all emotes are being input via this extension and not handling variants 
+var updateEmoteCounts = function(message) {
+  var counts = {};
+  message.split(' ').forEach(function(v) {
+    if (allEmotes.indexOf(v) > -1) {
+      if (v in emoteCounts) {
+        emoteCounts[v]++;
+      } else {
+        emoteCounts[v] = 1;
+      }
+      localStorage.setItem('kc-counts', JSON.stringify(emoteCounts));
+    }
+  });
 };
 
 // wait until DOM (and Ember) is loaded
