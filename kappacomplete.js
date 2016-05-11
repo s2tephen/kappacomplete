@@ -16,7 +16,9 @@ var setupExtension = function(cleanRegexes, bindEvents) {
   // inject script to access page javascript
   var tempCode = function() {
     // get list of valid emotes from TMI.js
-    localStorage.setItem('kc-regexes', JSON.stringify(TMI._sessions[0]._emotesParser.emoticonRegexToIds));
+    if (window.TMI) {
+      localStorage.setItem('kc-regexes', JSON.stringify(TMI._sessions[0]._emotesParser.emoticonRegexToIds));
+    }
     
     // wait for Ember to render — implementation by NightDev/BTTV
     var renderingCounter = 0;
@@ -87,6 +89,7 @@ var cleanRegexes = function() {
       allEmotes.push(k);
     }
   });
+  console.log(allEmotes);
 }
 
 // clean a single regex
@@ -129,7 +132,12 @@ function escapeRegex(str) {
 
 // return emotes that match substring
 var matchEmotes = function(substr) {
-  var regex = new RegExp('^' + escapeRegex(substr), 'i');
+  var regex;
+  if (substr.length === 1) {
+    regex = new RegExp('^' + escapeRegex(substr) + '(?!-)', 'i'); // remove :D/:-D style variants
+  } else {
+    regex = new RegExp('^' + escapeRegex(substr), 'i');
+  }
   return allEmotes.filter(function(v) {
     return regex.test(v);
   }).sort(function(a, b) { // sort by count
@@ -170,7 +178,7 @@ var bindEvents = function() {
   // update predictions based on text input
   var onChatInput = function(e) {
     curStr = e.target.value.split(' ').splice(-1)[0];
-    if (curStr.length > 1) {
+    if (curStr.length > 0) {
       emotes = matchEmotes(curStr);
     } else {
       emotes = [];
