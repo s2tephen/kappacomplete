@@ -36,7 +36,7 @@ var setupExtension = function(cleanRegexes, bindEvents) {
       before: function() {
         renderingCounter++;
       },
-      
+
       after: function(name, ts, payload) {
         renderingCounter--;
         // check that user is on a channel page
@@ -229,7 +229,7 @@ var updateEmoteCounts = function(message) {
 };
 
 // wait until DOM (and Ember) is loaded
-if (document.body.getAttribute('data-page') === 'ember#ember_channel') {
+if (/^ember/.test(document.body.getAttribute('data-page'))) {
   if (document.readyState === 'complete') {
     setupExtension(cleanRegexes, bindEvents);
   } else {

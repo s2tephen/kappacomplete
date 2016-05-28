@@ -12,8 +12,10 @@ Thanks to [Twitchemotes](https://twitchemotes.com) for their global emotes API, 
 
 ## Changelog
 
-### 0.4 (05/28/16)
+### 0.5 (05/28/16)
 * Fixed a bug where the extension wouldn't work if users navigated from the Twitch homepage
+
+### 0.4 (05/28/16)
 * Resolved race condition between loading TMI.js and importing emotes
 * Added Twitchemotes API as fallback
 
