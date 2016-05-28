@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "KappaComplete",
-  "version": "0.3",
+  "version": "0.4",
   "description": "A lightweight autocomplete extension for Twitch emotes.",
   "icons": {
     "128": "icon128.png"

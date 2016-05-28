@@ -15,11 +15,6 @@ var setupExtension = function(cleanRegexes, bindEvents) {
 
   // inject script to access page javascript
   var tempCode = function() {
-    // get list of valid emotes from TMI.js
-    if (window.TMI) {
-      localStorage.setItem('kc-regexes', JSON.stringify(TMI._sessions[0]._emotesParser.emoticonRegexToIds));
-    }
-    
     // wait for Ember to render — implementation by NightDev/BTTV
     var renderingCounter = 0;
 
@@ -41,14 +36,37 @@ var setupExtension = function(cleanRegexes, bindEvents) {
       before: function() {
         renderingCounter++;
       },
+      
       after: function(name, ts, payload) {
         renderingCounter--;
         // check that user is on a channel page
         if (App.__container__.lookup('controller:application').get('currentRouteName') === 'channel.index.index') {
           waitForLoad(function(ready) {
+            // get list of valid emotes from TMI.js
+            if (window.TMI) {
+              localStorage.setItem('kc-regexes', JSON.stringify(TMI._sessions[0]._emotesParser.emoticonRegexToIds));
+            } else if (!localStorage['kc-regexes']) {
+              // use Twitchemotes API as fallback
+              var request = new XMLHttpRequest();
+              request.open('GET', 'https://twitchemotes.com/api_cache/v2/global.json', true);
+              
+              request.onload = function() {
+                if (request.status >= 200 && request.status < 400) {
+                  localStorage.setItem('kc-regexes', JSON.stringify(JSON.parse(request.responseText).emotes));
+                } else {
+                  console.log('ERROR: Emotes could not be loaded.');
+                }
+              };
+
+              request.onerror = function() {
+                console.log('ERROR: Emotes could not be loaded.');
+              };
+
+              request.send();
+            }
+
             // use local storage to notify extension when ready
             if (ready && localStorage['kc-ready'] === 'false') {
-              localStorage.removeItem('kc-ready');
               localStorage.setItem('kc-ready', true);
               // manually fire storage event to trigger listener
               window.dispatchEvent(new StorageEvent('storage', {
@@ -89,7 +107,6 @@ var cleanRegexes = function() {
       allEmotes.push(k);
     }
   });
-  console.log(allEmotes);
 }
 
 // clean a single regex
@@ -212,12 +229,14 @@ var updateEmoteCounts = function(message) {
 };
 
 // wait until DOM (and Ember) is loaded
-if (document.readyState === 'complete') {
-  setupExtension(cleanRegexes, bindEvents);
-} else {
-  document.addEventListener('readystatechange', function() {
-    if (document.readyState === 'complete') {
-      setupExtension(cleanRegexes, bindEvents);
-    }
-  }, false);
+if (document.body.getAttribute('data-page') === 'ember#ember_channel') {
+  if (document.readyState === 'complete') {
+    setupExtension(cleanRegexes, bindEvents);
+  } else {
+    document.addEventListener('readystatechange', function() {
+      if (document.readyState === 'complete') {
+        setupExtension(cleanRegexes, bindEvents);
+      }
+    }, false);
+  }
 }
